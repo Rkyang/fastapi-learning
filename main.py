@@ -11,3 +11,7 @@ async def root():
 @app.get("/hello/{name}")
 async def say_hello(name: str):
     return {"message": f"Hello {name}"}
+
+@app.get("/user/hello")
+async def user_hello():
+    return {"msg": "我正在学习FastAPI……"}
