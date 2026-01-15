@@ -1,7 +1,16 @@
-from fastapi import FastAPI, Path
+from fastapi import FastAPI, Path, Query
 
 app = FastAPI()
 
+# 查询参数 Query类型
+@app.get("/book/query")
+async def book_query(
+        category: str = Query('python开发', min_length=5, max_length=255),
+        price: float = Query(0, gt=50, lt=100),
+):
+    return {"category": category, "price": price}
+
+# 路径参数 Path类型
 @app.get("/news/byName/{news_name}")
 async def news_by_name(news_name: str = Path(..., min_length=2, max_length=10, description='按分类名称获取，名称长度2-10')):
     return {"news_name": news_name}
@@ -10,6 +19,7 @@ async def news_by_name(news_name: str = Path(..., min_length=2, max_length=10, d
 async def news_by_id(news_id: int = Path(..., gt=0, lt=101, description='按分类id获取，id范围1-100')):
     return {"新闻分类id": news_id}
 
+# 路径参数
 @app.get("/user/{user_id}")
 async def get_user(user_id: str):
     return {"user_id": user_id, "user_name": f"用户id={user_id}"}
@@ -18,6 +28,7 @@ async def get_user(user_id: str):
 async def get_book(id: int):
     return {"id": id, "title": f"这是第 {id} 本书"}
 
+# init
 @app.get("/user/hello")
 async def user_hello():
     return {"msg": "我正在学习FastAPI……"}
