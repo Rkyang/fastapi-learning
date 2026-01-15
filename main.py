@@ -1,7 +1,14 @@
 from fastapi import FastAPI, Path, Query
+from fastapi.responses import HTMLResponse
+
 from models.bookInfo import BookInfo
 
 app = FastAPI()
+
+# 响应类型-装饰器方式
+@app.get("/html", response_class=HTMLResponse)
+async def html():
+    return '<h1>这是一级标题</h1>'
 
 # 请求体参数
 @app.post("/book/new")
