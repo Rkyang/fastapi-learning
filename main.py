@@ -1,6 +1,12 @@
 from fastapi import FastAPI, Path, Query
+from models.bookInfo import BookInfo
 
 app = FastAPI()
+
+# 请求体参数
+@app.post("/book/new")
+async def new_book(book_info: BookInfo):
+    return {"book_info": book_info}
 
 # 查询参数 Query类型
 @app.get("/book/query")
