@@ -1,9 +1,15 @@
 from fastapi import FastAPI, Path, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 
 from models.bookInfo import BookInfo
 
 app = FastAPI()
+
+# 响应类型-响应对象方式
+@app.get("/file")
+async def get_file():
+    path = './files/1.jpg'
+    return FileResponse(path)
 
 # 响应类型-装饰器方式
 @app.get("/html", response_class=HTMLResponse)
