@@ -1,10 +1,18 @@
-from fastapi import FastAPI, Path, Query
+from fastapi import FastAPI, Path, Query, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 
 from models.bookInfo import BookInfo
 from models.newsInfo import NewsInfo
 
 app = FastAPI()
+
+# 异常响应处理
+@app.get("/news/{id}")
+async def get_news(id: int):
+    id_list = [1,2,3,4,5,6]
+    if id not in id_list:
+        raise HTTPException(status_code=404, detail='not exist')
+    return {"id": id}
 
 # 自定义响应类型
 @app.get("/news/diy_resp/{id}", response_model=NewsInfo)
