@@ -6,6 +6,21 @@ from models.newsInfo import NewsInfo
 
 app = FastAPI()
 
+# 中间件
+@app.middleware("http")
+async def middleware2(request, call_next):
+    print('mw2 start')
+    response = await call_next(request)
+    print('mw2 end')
+    return response
+
+@app.middleware("http")
+async def middleware1(request, call_next):
+    print('mw1 start')
+    response = await call_next(request)
+    print('mw1 end')
+    return response
+
 # 异常响应处理
 @app.get("/news/{id}")
 async def get_news(id: int):
