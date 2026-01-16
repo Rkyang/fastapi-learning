@@ -2,8 +2,18 @@ from fastapi import FastAPI, Path, Query
 from fastapi.responses import HTMLResponse, FileResponse
 
 from models.bookInfo import BookInfo
+from models.newsInfo import NewsInfo
 
 app = FastAPI()
+
+# 自定义响应类型
+@app.get("/news/diy_resp/{id}", response_model=NewsInfo)
+async def get_news(id: int):
+    return {
+        "id": id,
+        "title": f'this is {id} book',
+        "content": "it's great book"
+    }
 
 # 响应类型-响应对象方式
 @app.get("/file")
