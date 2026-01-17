@@ -63,9 +63,23 @@ async def get_users(db: AsyncSession = Depends(get_db)):
     users = result.scalars().first()
     return users
 @app.get('/user/getUser/{id}')
-async def get_users(id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.get(TestUser, id)
-    return result
+async def get_users_id(id: int, db: AsyncSession = Depends(get_db)):
+    # result = await db.get(TestUser, id)
+    # return result
+
+    result = await db.execute(select(TestUser).where(TestUser.id == id))
+    return result.scalar_one_or_none()
+@app.get('/user/search')
+async def get_users_search(db: AsyncSession = Depends(get_db)):
+    # like
+    # result = await db.execute(select(TestUser).where(TestUser.user_name.like('%三%')))
+    # 与或非
+    # result = await db.execute(select(TestUser).where((TestUser.user_name.like('%三%')) & (TestUser.password == '123456')))
+    # in
+    id_list = [1,3]
+    result = await db.execute(select(TestUser).where(TestUser.id.in_(id_list)))
+    users = result.scalars().all()
+    return users
 
 # 依赖注入 Depends
 async def common_params(
