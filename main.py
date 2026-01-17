@@ -2,7 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Path, Query, HTTPException, Depends
 from fastapi.responses import HTMLResponse, FileResponse
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from config.db_config import DATABASE_URL
 from models import BaseModel
@@ -31,6 +32,34 @@ async def lifespan(app: FastAPI):
     print('lifespan end')
 
 app = FastAPI(lifespan=lifespan)
+
+# 路由匹配中使用orm
+# 创建异步会话工厂
+AsyncSessionLocal = async_sessionmaker(
+    # 绑定数据库引擎
+    bind=async_engine,
+    # 指定会话类
+    class_=AsyncSession,
+    # 会话不过期，不重查库
+    expire_on_commit=False
+)
+# 依赖项，获取数据库会话
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+# 查库
+@app.get('/user/getAll')
+async def get_users(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(TestUser))
+    users = result.scalars().all()
+    return users
 
 # 依赖注入 Depends
 async def common_params(
