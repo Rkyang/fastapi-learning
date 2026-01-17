@@ -1,10 +1,36 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Path, Query, HTTPException, Depends
 from fastapi.responses import HTMLResponse, FileResponse
+from sqlalchemy.ext.asyncio import create_async_engine
 
-from models.bookInfo import BookInfo
-from models.newsInfo import NewsInfo
+from config.db_config import DATABASE_URL
+from models import BaseModel
+from schemas.bookInfo import BookInfo
+from schemas.newsInfo import NewsInfo
+from models.TestUser import TestUser
 
-app = FastAPI()
+# ORM 建表
+# 创建异步引擎
+async_engine = create_async_engine(
+    DATABASE_URL,
+    echo=True, #可选，输出sql日志
+    pool_size=10, # 活跃连接数
+    max_overflow=20 # 额外连接数
+)
+# 建表
+async def create_tables():
+    async with async_engine.begin() as conn:
+        await conn.run_sync(TestUser.metadata.create_all)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("lifespan start")
+    await create_tables()
+    yield
+    print('lifespan end')
+
+app = FastAPI(lifespan=lifespan)
 
 # 依赖注入 Depends
 async def common_params(
