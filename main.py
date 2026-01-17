@@ -1,10 +1,21 @@
-from fastapi import FastAPI, Path, Query, HTTPException
+from fastapi import FastAPI, Path, Query, HTTPException, Depends
 from fastapi.responses import HTMLResponse, FileResponse
 
 from models.bookInfo import BookInfo
 from models.newsInfo import NewsInfo
 
 app = FastAPI()
+
+# 依赖注入 Depends
+async def common_params(
+        skip: int = Query(default=0, ge=0),
+        limit: int = Query(default=20, le=100)
+):
+    return {"skip": skip, "limit": limit}
+
+@app.get("/new/list")
+async def news_list(common = Depends(common_params)):
+    return common
 
 # 中间件
 @app.middleware("http")
