@@ -6,10 +6,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from config.db_config import DATABASE_URL
-from models import BaseModel
+from models.TestUser import TestUser
 from schemas.bookInfo import BookInfo
 from schemas.newsInfo import NewsInfo
-from models.TestUser import TestUser
 
 # ORM 建表
 # 创建异步引擎
@@ -55,11 +54,18 @@ async def get_db():
         finally:
             await session.close()
 # 查库
-@app.get('/user/getAll')
+@app.get('/user/getUser')
 async def get_users(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(TestUser))
-    users = result.scalars().all()
+    # 查所有
+    # users = result.scalars().all()
+    # 第一条
+    users = result.scalars().first()
     return users
+@app.get('/user/getUser/{id}')
+async def get_users(id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.get(TestUser, id)
+    return result
 
 # 依赖注入 Depends
 async def common_params(
