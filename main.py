@@ -2,13 +2,14 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Path, Query, HTTPException, Depends
 from fastapi.responses import HTMLResponse, FileResponse
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from config.db_config import DATABASE_URL
 from models.TestUser import TestUser
 from schemas.bookInfo import BookInfo
 from schemas.newsInfo import NewsInfo
+from schemas.testUser import TestUserNew
 
 # ORM 建表
 # 创建异步引擎
@@ -80,6 +81,16 @@ async def get_users_search(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(TestUser).where(TestUser.id.in_(id_list)))
     users = result.scalars().all()
     return users
+# 插库
+@app.post('/user/new')
+async def get_users_search(user_new: TestUserNew, db: AsyncSession = Depends(get_db)):
+    obj = TestUser(**user_new.__dict__)
+    query_result = await db.execute(select(func.max(TestUser.id)))
+    max_id: int = query_result.scalar()
+    obj.id = (max_id + 1)
+    db.add(obj)
+    await db.commit()
+    return user_new
 
 # 依赖注入 Depends
 async def common_params(
