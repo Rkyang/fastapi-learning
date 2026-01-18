@@ -93,7 +93,7 @@ async def get_users_search(user_new: TestUserSchemaBase, db: AsyncSession = Depe
     return user_new
 # 改库
 @app.put('/user/upd/{id}')
-async def get_users_search(id: int, user_upd: TestUserSchemaBase, db: AsyncSession = Depends(get_db)):
+async def user_upd(id: int, user_upd: TestUserSchemaBase, db: AsyncSession = Depends(get_db)):
     source_obj = await db.get(TestUser, id)
     if source_obj is None:
         raise HTTPException(status_code=404, detail='not exist')
@@ -103,6 +103,16 @@ async def get_users_search(id: int, user_upd: TestUserSchemaBase, db: AsyncSessi
 
     await db.commit()
     return user_upd
+# 删库
+@app.delete('/user/del/{id}')
+async def user_del(id: int, db: AsyncSession = Depends(get_db)):
+    source_obj = await db.get(TestUser, id)
+    if source_obj is None:
+        raise HTTPException(status_code=404, detail='not exist')
+
+    await db.delete(source_obj)
+    await db.commit()
+    return {'id': id}
 
 # 依赖注入 Depends
 async def common_params(
