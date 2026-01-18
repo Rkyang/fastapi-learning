@@ -9,7 +9,7 @@ from config.db_config import DATABASE_URL
 from models.TestUser import TestUser
 from schemas.bookInfo import BookInfo
 from schemas.newsInfo import NewsInfo
-from schemas.testUser import TestUserNew
+from schemas.testUser import TestUserSchemaBase
 
 # ORM 建表
 # 创建异步引擎
@@ -83,7 +83,7 @@ async def get_users_search(db: AsyncSession = Depends(get_db)):
     return users
 # 插库
 @app.post('/user/new')
-async def get_users_search(user_new: TestUserNew, db: AsyncSession = Depends(get_db)):
+async def get_users_search(user_new: TestUserSchemaBase, db: AsyncSession = Depends(get_db)):
     obj = TestUser(**user_new.__dict__)
     query_result = await db.execute(select(func.max(TestUser.id)))
     max_id: int = query_result.scalar()
@@ -91,6 +91,18 @@ async def get_users_search(user_new: TestUserNew, db: AsyncSession = Depends(get
     db.add(obj)
     await db.commit()
     return user_new
+# 改库
+@app.put('/user/upd/{id}')
+async def get_users_search(id: int, user_upd: TestUserSchemaBase, db: AsyncSession = Depends(get_db)):
+    source_obj = await db.get(TestUser, id)
+    if source_obj is None:
+        raise HTTPException(status_code=404, detail='not exist')
+
+    source_obj.user_name = user_upd.user_name
+    source_obj.password = user_upd.password
+
+    await db.commit()
+    return user_upd
 
 # 依赖注入 Depends
 async def common_params(
