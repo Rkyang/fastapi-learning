@@ -1,10 +1,9 @@
 from fastapi import FastAPI
+from routes import test_news
 
 app = FastAPI()
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+app.include_router(test_news.router, prefix="/api/news", tags=["news"])
