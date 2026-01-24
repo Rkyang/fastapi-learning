@@ -44,9 +44,14 @@ async def get_news_detail(
         new_id: int = Query(..., alias="id"),
         db: AsyncSession = Depends(get_db)
 ):
+    # 查询详情
     result = await news.get_news_detail(db, new_id)
     if not result:
         raise HTTPException(status_code=404, detail="Not Found")
+
+    # 增加浏览量
+    await news.add_views(db, new_id)
+
     return {
         "code": 200,
         "message": "success",
