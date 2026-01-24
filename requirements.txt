@@ -3,3 +3,5 @@ uvicorn~=0.20.0
 pydantic
 sqlalchemy[asyncio]
 python-dotenv
+passlib
+argon2-cffi

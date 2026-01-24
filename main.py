@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import news
+from routes import news, user
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -21,3 +21,4 @@ async def root():
     return {"message": "Hello World"}
 
 app.include_router(news.router, prefix="/api/news", tags=["news"])
+app.include_router(user.router, prefix="/api/user", tags=["user"])
