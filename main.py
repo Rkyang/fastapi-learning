@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import news_category
+from routes import news
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -20,4 +20,4 @@ app.add_middleware(
 async def root():
     return {"message": "Hello World"}
 
-app.include_router(news_category.router, prefix="/api/news", tags=["news"])
+app.include_router(news.router, prefix="/api/news", tags=["news"])
