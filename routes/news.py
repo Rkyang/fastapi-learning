@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -36,5 +36,29 @@ async def get_categories(
             "list": result,
             "total": total,
             "hasMore": has_more
+        }
+    }
+
+@router.get("/detail")
+async def get_news_detail(
+        new_id: int = Query(..., alias="id"),
+        db: AsyncSession = Depends(get_db)
+):
+    result = await news.get_news_detail(db, new_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Not Found")
+    return {
+        "code": 200,
+        "message": "success",
+        "data": {
+            "id": result.id,
+            "title": result.title,
+            "content": result.content,
+            "image": result.image,
+            "author": result.author,
+            "publishTime": result.publish_time,
+            "categoryId": result.category_id,
+            "views": result.views,
+            "relatedNews": []
         }
     }
