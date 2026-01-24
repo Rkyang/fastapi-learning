@@ -28,3 +28,21 @@ async def add_views(db: AsyncSession, news_id: int):
     result = await db.execute(stmt)
     await db.commit()
     return result.rowcount > 0
+
+async def get_relate_news(db: AsyncSession, category_id: int, news_id: int):
+    stmt = (select(News)
+            .where(News.category_id == category_id, News.id != news_id)
+            .order_by(News.views.desc(), News.publish_time.desc())
+            .limit(5))
+    r = await db.execute(stmt)
+    # 使用列表推导式
+    return [{
+        "id": result.id,
+        "title": result.title,
+        "content": result.content,
+        "image": result.image,
+        "author": result.author,
+        "publishTime": result.publish_time,
+        "categoryId": result.category_id,
+        "views": result.views,
+    } for result in r.scalars().all()]

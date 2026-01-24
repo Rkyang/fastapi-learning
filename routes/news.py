@@ -52,6 +52,9 @@ async def get_news_detail(
     # 增加浏览量
     await news.add_views(db, new_id)
 
+    # 获取相关推荐
+    relate_news = await news.get_relate_news(db, result.category_id, new_id)
+
     return {
         "code": 200,
         "message": "success",
@@ -64,6 +67,6 @@ async def get_news_detail(
             "publishTime": result.publish_time,
             "categoryId": result.category_id,
             "views": result.views,
-            "relatedNews": []
+            "relatedNews": relate_news
         }
     }
