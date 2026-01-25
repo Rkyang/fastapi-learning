@@ -6,6 +6,7 @@ from starlette import status
 from crud import user
 from config.db_config import get_db
 from schemas.user import UserRequest, UserAuthResponse, UserInfoBase, UserInfoResponse
+from utils.auth import get_current_user
 from utils.response import success_response
 
 router = APIRouter()
@@ -29,3 +30,7 @@ async def login(user_data: UserRequest, db: AsyncSession = Depends(get_db)):
     token = await user.create_token(result_user.id, db)
     response_data = UserAuthResponse(token=token, userInfo=UserInfoResponse.model_validate(result_user))
     return success_response(message="登录成功", data=response_data)
+
+@router.get("/info")
+async def info(user_data: UserInfoResponse = Depends(get_current_user)):
+    return success_response(data=UserInfoResponse.model_validate(user_data))
