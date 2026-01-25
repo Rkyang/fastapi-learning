@@ -5,7 +5,8 @@ from starlette import status
 
 from crud import user
 from config.db_config import get_db
-from schemas.user import UserRequest, UserAuthResponse, UserInfoBase, UserInfoResponse
+from models.user import User
+from schemas.user import UserRequest, UserAuthResponse, UserInfoBase, UserInfoResponse, PasswordChangeRequest
 from utils.auth import get_current_user
 from utils.response import success_response
 
@@ -43,3 +44,14 @@ async def update(
 ):
     user_info = await user.update_user(db,user_upd, current_user.id)
     return success_response(data=UserInfoResponse.model_validate(user_info))
+
+@router.put("/password")
+async def update_password(
+        pwd_upd: PasswordChangeRequest,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    result = await user.change_password(db,current_user, pwd_upd)
+    if not result:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to change password")
+    return success_response()

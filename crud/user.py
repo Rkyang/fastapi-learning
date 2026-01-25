@@ -4,8 +4,9 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
-from schemas.user import UserRequest, UserInfoBase
+from schemas.user import UserRequest, UserInfoBase, PasswordChangeRequest
 from utils import security
 from models.user import User, UserToken
 
@@ -85,3 +86,16 @@ async def update_user(
     user_info = await get_user_by_id(user_id, db)
     return user_info
 
+async def change_password(
+        db: AsyncSession,
+        current_user: User,
+        pwd_upd: PasswordChangeRequest
+):
+    if not security.validate_password(pwd_upd.old_password, current_user.password):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid old password")
+    new_password = security.get_password_hash(pwd_upd.new_password)
+    current_user.password = new_password
+    db.add(current_user)
+    await db.commit()
+    await db.refresh(current_user)
+    return True

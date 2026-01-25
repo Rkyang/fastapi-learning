@@ -37,3 +37,7 @@ class UserAuthResponse(BaseModel):
         # 允许从orm对象属性中取值
         from_attributes=True
     )
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str = Field(..., alias="oldPassword")
+    new_password: str = Field(..., min_length=6, alias="newPassword")
