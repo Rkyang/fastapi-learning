@@ -1,13 +1,18 @@
 import uuid
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
+from fastapi import HTTPException
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.user import UserRequest
+from schemas.user import UserRequest, UserInfoBase
 from utils import security
 from models.user import User, UserToken
 
+async def get_user_by_id(user_id: int, db: AsyncSession):
+    query = select(User).where(User.id == user_id)
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
 
 async def get_user_by_username(username: str, db: AsyncSession):
     query = select(User).where(User.username == username)
@@ -60,3 +65,23 @@ async def get_user_by_token(token: str, db: AsyncSession):
     if not user_info:
         return None
     return user_info
+
+async def update_user(
+        db: AsyncSession,
+        user_upd: UserInfoBase,
+        user_id: int
+):
+    smst = update(User).where(User.id == user_id).values(
+        # 没有设置值的不更新
+        **user_upd.model_dump(
+            exclude_unset=True,
+            exclude_none=True
+        )
+    )
+    result = await db.execute(smst)
+    await db.commit()
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_info = await get_user_by_id(user_id, db)
+    return user_info
+

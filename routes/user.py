@@ -34,3 +34,12 @@ async def login(user_data: UserRequest, db: AsyncSession = Depends(get_db)):
 @router.get("/info")
 async def info(user_data: UserInfoResponse = Depends(get_current_user)):
     return success_response(data=UserInfoResponse.model_validate(user_data))
+
+@router.put("/update")
+async def update(
+        user_upd: UserInfoBase,
+        current_user: UserInfoResponse = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    user_info = await user.update_user(db,user_upd, current_user.id)
+    return success_response(data=UserInfoResponse.model_validate(user_info))
