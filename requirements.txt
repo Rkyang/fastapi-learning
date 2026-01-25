@@ -5,3 +5,4 @@ sqlalchemy[asyncio]
 python-dotenv
 passlib
 argon2-cffi
+starlette
